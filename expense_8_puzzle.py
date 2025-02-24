@@ -63,5 +63,13 @@ def expand(node, cost, level, method, pathway, move):
 
     return successors
 
+def action(tile, direcion, move):
+    action = move.copy()
+    action.append("Move " + str(tile) + " " + direcion)
+    return action
 
+def path(way, node):
+    path = way.copy()
+    path.append(node)
+    return path 
 
