@@ -113,14 +113,66 @@ def add_node(st, cst, lvl, act, pth):
     fringe["path"].append(pth)
     fringe["action"].append(act)
 
-    # h(n) value for greedy
     if method == "greedy" or method == "a*":
         hrs = heuristic(st)
-        fringe["heuristic"].append(hrs)
+        fringe["heuristic"].append(hrs) # h(n) value for greedy
 
-        # f(n)+h(n) value for a* 
         if method == "a*":
-            fringe ["fnvalue"].append(cst+hrs)
+            fringe ["fnvalue"].append(cst+hrs)  # f(n)+h(n) value for a* 
 
+
+num = len(sys.argv)
+
+if os.path.isfile(sys.argv[1]) == 1:
+    start = read(sys.argv[1])
+else:
+    print("Invalid Start file\n")
+
+if os.path.isfile(sys.argv[2]) == 1:
+    goal = read(sys.argv[2])
+else:
+    print("Invalid Goal file\n")
+
+Flag = "false"
+args = []
+
+for i in range(len(sys.argv)):
+    args.append(sys.argv[i])
+
+if args == "true":
+    Flag = "true"
+
+for arg in args:
+    if arg in methods:
+        method = arg
+
+if Flag == "true":
+    file1 = open("dump.txt","w")
+    file1.write("Command-Line Arguments: ")
+    file1.write(str(args[1:]))
+    file1.write("\nMethod Selected: {}".format(method))
+    file1.write("\nRunning {}".format(method))
+    file1.close()
+
+node = start.copy()
+fringe["states"].append(node)
+fringe["cost"].append(0)
+fringe["level"].append(0)
+pathway = []
+pathway.append(None)
+fringe["path"].append(pathway)
+move = []
+move.append(None)
+fringe["action"].append(move)
+fringe["heuristic"].append(heuristic(node))
+fringe["fnvalue"].append(fringe["cost"][0]+fringe["heuristic"][0])
+expanded = 0
+generated = 0
+popped = 0
+fsize = len(fringe["states"])
+closed = []
+
+
+    
 
 
