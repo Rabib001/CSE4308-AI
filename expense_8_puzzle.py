@@ -139,7 +139,7 @@ args = []
 for i in range(len(sys.argv)):
     args.append(sys.argv[i])
 
-if args == "true":
+if "true" in args:
     Flag = "true"
 
 for arg in args:
