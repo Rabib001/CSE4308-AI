@@ -172,7 +172,41 @@ popped = 0
 fsize = len(fringe["states"])
 closed = []
 
+# Write on dump file
+def writeonfile(node, cost, level, pathway, move, successors, fnvalue=None):
+    with open("dump.txt", "a") as file1:
+        if method == "a*":
+            file1.write(
+                f"\nGenerating successors to < state = {node}, action = {move}, g(n) = {cost}, "
+                f"d = {level}, f(n) = {fnvalue}, parent = {pathway} >:"
+            )
+        else:
+            file1.write(
+                f"\nGenerating successors to < state = {node}, action = {move}, g(n) = {cost}, "
+                f"d = {level}, parent = {pathway} >:"
+            )
 
+        file1.write(f"\n{successors} successors generated")
+
+        # Write closed list (if applicable)
+        if method not in ("ids", "dls"):
+            file1.write(f"\nClosed: {closed}")
+
+        # Write fringe content
+        file1.write("\nFringe:")
+        for i in range(len(fringe["states"])):
+            if method == "a*":
+                file1.write(
+                    f"\n< state = {fringe['states'][i]}, action = {fringe['action'][i][-1]}, "
+                    f"g(n) = {fringe['cost'][i]}, d = {fringe['level'][i]}, "
+                    f"f(n) = {fringe['fnvalue'][i]}, parent = {fringe['path'][i][-1]} >"
+                )
+            else:
+                file1.write(
+                    f"\n< state = {fringe['states'][i]}, action = {fringe['action'][i][-1]}, "
+                    f"g(n) = {fringe['cost'][i]}, d = {fringe['level'][i]}, "
+                    f"parent = {fringe['path'][i][-1]} >"
+                )
     
 
 
