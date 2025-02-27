@@ -12,6 +12,7 @@ def read(file):
     #return fist 9 integers as a 3x3 2d array
     return np.array(list).reshape(3,3)
 
+
 #epand node and generate it's successors
 def expand(node, cost, level, method, pathway, move):
     def generate(node, cost, level, pathway, move, tile, direction, x1, x2, y1, y2):
@@ -65,15 +66,18 @@ def expand(node, cost, level, method, pathway, move):
 
     return successors
 
+
 def action(tile, direcion, move):
     action = move.copy()
     action.append("Move " + str(tile) + " " + direcion)
     return action
 
+
 def path(way, node):
     path = way.copy()
     path.append(node)
     return path 
+
 
 def heuristic(node):
     goal ={
@@ -105,6 +109,7 @@ fringe = {
     "fnvalue" : []
 }
 
+
 #add node to the firnge
 def add_node(st, cst, lvl, act, pth):
     fringe["states"].append(st)
@@ -119,6 +124,7 @@ def add_node(st, cst, lvl, act, pth):
 
         if method == "a*":
             fringe ["fnvalue"].append(cst+hrs)  # f(n)+h(n) value for a* 
+
 
 
 num = len(sys.argv)
@@ -209,4 +215,22 @@ def writeonfile(node, cost, level, pathway, move, successors, fnvalue=None):
                 )
     
 
+def writegoalonfile(node, cost, level, pathway, move, fnvalue=None):
+    with open("dump.txt", "a") as file1:
+        if method == "a*":
+            file1.write(
+                f"\nGoal state reached: < state = {node}, action = {move}, g(n) = {cost}, "
+                f"d = {level}, f(n) = {fnvalue}, parent = {pathway} >:"
+            )
+        else:
+            file1.write(
+                f"\nGoal state reached: < state = {node}, action = {move}, g(n) = {cost}, "
+                f"d = {level}, parent = {pathway} >:"
+            )
+        
+        file1.write(f"\nNodes Popped: {popped}")
+        file1.write(f"\nNodes Expanded: {expanded}")
+        file1.write(f"\nMax Fringe Size: {fsize}")
 
+        if method != "a*":
+            file1.write(f"\nNodes Generated: {generated}")
