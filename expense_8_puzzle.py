@@ -3,6 +3,8 @@ import numpy as np
 
 method = "a*" #default method if no method is mentioned
 
+methods = ["bfs", "ucs", "dfs", "dls", "ids", "greedy", "a*"]
+
 #Read file
 def read(file):
     with open(file, "r") as txt_file:
@@ -18,7 +20,7 @@ def expand(node, cost, level, method, pathway, move):
         p = path(pathway, node)     #update pathway
         a = action(s[x1, y1],direction, move)   #generate action description
         s[x2][y2], s[x1][y1] == s[x1][y1], s[x2][y2]    #swap values in the grid
-        addToFringe(s, c, level, p, a)
+        add_node(s, c, level, p, a)
         return 1
     
     successors = 0
@@ -72,4 +74,53 @@ def path(way, node):
     path = way.copy()
     path.append(node)
     return path 
+
+def heuristic(node):
+    goal ={
+        1: (0, 0),
+        2: (0, 1),
+        3: (0, 2),
+        4: (1, 0),
+        5: (1, 1),
+        6: (1, 2),
+        7: (2, 0),
+        8: (2, 1)
+    }
+
+    hrs = 0 
+    for i in range(1, 9):
+        current_position = np.whre(node == i)
+        goal_row, goal_col = goal[i]
+        hrs += abs(current_position[0][0] - goal_row) + abs(current_position[1][0] - goal_col)
+
+    return hrs
+
+fringe = {
+    "states" : [],
+    "cost" : [],
+    "level" : [],
+    "path" : [],
+    "action" : [],
+    "heuristic" : [],
+    "fnvalue" : []
+}
+
+#add node to the firnge
+def add_node(st, cst, lvl, act, pth):
+    fringe["states"].append(st)
+    fringe["cost"].append(cst)
+    fringe["level"].append(lvl+1)
+    fringe["path"].append(pth)
+    fringe["action"].append(act)
+
+    # h(n) value for greedy
+    if method == "greedy" or method == "a*":
+        hrs = heuristic(st)
+        fringe["heuristic"].append(hrs)
+
+        # f(n)+h(n) value for a* 
+        if method == "a*":
+            fringe ["fnvalue"].append(cst+hrs)
+
+
 
