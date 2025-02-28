@@ -280,3 +280,48 @@ if method == 'bfs':
 
         # Update max fringe size
         fsize = max(fsize, len(fringe["states"]))
+
+if method == 'ucs':
+    while fringe["states"]:
+        # Find the node with the lowest cost
+        lowest_cost_index = fringe["cost"].index(min(fringe["cost"]))
+        
+        # Pop the node with the lowest cost
+        node, cost, level, pathway, move = (
+            fringe["states"].pop(lowest_cost_index),
+            fringe["cost"].pop(lowest_cost_index),
+            fringe["level"].pop(lowest_cost_index),
+            fringe["path"].pop(lowest_cost_index),
+            fringe["action"].pop(lowest_cost_index)
+        )
+        popped += 1
+
+        # Check if the goal is reached
+        if (node == goal).all():
+            print(f"Nodes Popped: {popped}")
+            print(f"Nodes Expanded: {expanded}")
+            print(f"Nodes Generated: {generated}")
+            print(f"Max Fringe Size: {fsize}")
+            print(f"Nodes enclosed: {len(closed)}")
+            print(f"Goal reached at depth {level} at a cost of {cost}.")
+            print("Steps:")
+            for step in move[1:]:
+                print(step)
+            writegoalonfile(node, cost, level, pathway[-1], move[-1])
+            break
+
+        # Skip if the node is already in the closed list
+        if any((node == x).all() for x in closed):
+            continue
+
+        # Generate successors and update fringe
+        successors = expand(node, cost, level, method, pathway, move)
+        generated += successors
+        closed.append(node)
+        if Flag == "true":
+            writeonfile(node, cost, level, pathway[-1], move[-1], successors)
+        expanded += 1
+
+        # Update max fringe size
+        fsize = max(fsize, len(fringe["states"]))
+
