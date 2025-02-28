@@ -15,12 +15,12 @@ def read(file):
 
 #epand node and generate it's successors
 def expand(node, cost, level, method, pathway, move):
-    def generate(node, cost, level, pathway, move, tile, direction, x1, x2, y1, y2):
+    def generate(node, cost, level, pathway, move, tile, direction, x1, y1, x2, y2):
         s = node.copy() #copy current state
         c = cost + s[x1][y1]    #update cost by adding the value of tile being moved
         p = path(pathway, node)     #update pathway
         a = action(s[x1, y1],direction, move)   #generate action description
-        s[x2][y2], s[x1][y1] == s[x1][y1], s[x2][y2]    #swap values in the grid
+        s[x2][y2], s[x1][y1] = s[x1][y1], s[x2][y2]    #swap values in the grid
         add_node(s, c, level, p, a)
         return 1
     
@@ -79,7 +79,7 @@ def path(way, node):
     return path 
 
 
-def heuristic(node):
+def calculate_hrs(node):
     goal ={
         1: (0, 0),
         2: (0, 1),
@@ -93,7 +93,7 @@ def heuristic(node):
 
     hrs = 0 
     for i in range(1, 9):
-        current_position = np.whre(node == i)
+        current_position = np.where(node == i)
         goal_row, goal_col = goal[i]
         hrs += abs(current_position[0][0] - goal_row) + abs(current_position[1][0] - goal_col)
 
@@ -111,7 +111,7 @@ fringe = {
 
 
 #add node to the firnge
-def add_node(st, cst, lvl, act, pth):
+def add_node(st, cst, lvl, pth, act):
     fringe["states"].append(st)
     fringe["cost"].append(cst)
     fringe["level"].append(lvl+1)
@@ -119,7 +119,7 @@ def add_node(st, cst, lvl, act, pth):
     fringe["action"].append(act)
 
     if method == "greedy" or method == "a*":
-        hrs = heuristic(st)
+        hrs = calculate_hrs(st)
         fringe["heuristic"].append(hrs) # h(n) value for greedy
 
         if method == "a*":
@@ -152,6 +152,7 @@ for arg in args:
     if arg in methods:
         method = arg
 
+
 if Flag == "true":
     file1 = open("dump.txt","w")
     file1.write("Command-Line Arguments: ")
@@ -160,6 +161,8 @@ if Flag == "true":
     file1.write("\nRunning {}".format(method))
     file1.close()
 
+i = 0
+closed = []
 node = start.copy()
 fringe["states"].append(node)
 fringe["cost"].append(0)
@@ -170,17 +173,18 @@ fringe["path"].append(pathway)
 move = []
 move.append(None)
 fringe["action"].append(move)
-fringe["heuristic"].append(heuristic(node))
+fringe["heuristic"].append(calculate_hrs(node))
 fringe["fnvalue"].append(fringe["cost"][0]+fringe["heuristic"][0])
 expanded = 0
-generated = 0
 popped = 0
+generated = 1
 fsize = len(fringe["states"])
-closed = []
+
 
 # Write on dump file
 def writeonfile(node, cost, level, pathway, move, successors, fnvalue=None):
     with open("dump.txt", "a") as file1:
+        # Write common content
         if method == "a*":
             file1.write(
                 f"\nGenerating successors to < state = {node}, action = {move}, g(n) = {cost}, "
@@ -234,3 +238,45 @@ def writegoalonfile(node, cost, level, pathway, move, fnvalue=None):
 
         if method != "a*":
             file1.write(f"\nNodes Generated: {generated}")
+
+
+if method == 'bfs':
+    while fringe["states"]:
+        # Pop the first node from the fringe
+        node, cost, level, pathway, move = (
+            fringe["states"].pop(0),
+            fringe["cost"].pop(0),
+            fringe["level"].pop(0),
+            fringe["path"].pop(0),
+            fringe["action"].pop(0)
+        )
+        popped += 1
+
+        # Check if the goal is reached
+        if (node == goal).all():
+            print(f"Nodes Popped: {popped}")
+            print(f"Nodes Expanded: {expanded}")
+            print(f"Nodes Generated: {generated}")
+            print(f"Max Fringe Size: {fsize}")
+            print(f"Nodes enclosed: {len(closed)}")
+            print(f"Goal reached at depth {level} at a cost of {cost}.")
+            print("Steps:")
+            for step in move[1:]:
+                print(step)
+            writegoalonfile(node, cost, level, pathway[-1], move[-1])
+            break
+
+        # Skip if the node is already in the closed list
+        if any((node == x).all() for x in closed):
+            continue
+
+        # Generate successors and update fringe
+        successors = expand(node, cost, level, method, pathway, move)
+        generated += successors
+        closed.append(node)
+        if Flag == "true":
+            writeonfile(node, cost, level, pathway[-1], move[-1], successors)
+        expanded += 1
+
+        # Update max fringe size
+        fsize = max(fsize, len(fringe["states"]))
