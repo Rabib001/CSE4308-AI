@@ -252,7 +252,6 @@ if method == 'bfs':
         )
         popped += 1
 
-        # Check if the goal is reached
         if (node == goal).all():
             print(f"Nodes Popped: {popped}")
             print(f"Nodes Expanded: {expanded}")
@@ -296,7 +295,6 @@ if method == 'ucs':
         )
         popped += 1
 
-        # Check if the goal is reached
         if (node == goal).all():
             print(f"Nodes Popped: {popped}")
             print(f"Nodes Expanded: {expanded}")
@@ -341,7 +339,6 @@ if method == "greedy":
         )
         popped += 1
 
-        # Check if the goal is reached
         if (node == goal).all():
             print(f"Nodes Popped: {popped}")
             print(f"Nodes Expanded: {expanded}")
@@ -386,7 +383,6 @@ if method == "a*":
         )
         popped += 1
 
-        # Check if the goal is reached
         if (node == goal).all():
             print(f"Nodes Popped: {popped}")
             print(f"Nodes Expanded: {expanded}")
@@ -520,3 +516,36 @@ if method == 'ids':
             break  # Exit the entire IDS loop
 
         limit += 1  # Increase depth limit for the next iteration
+
+if method == 'dfs':
+    while fringe["states"]:
+        node, cost, level, pathway, move = (
+            fringe["states"].pop(),
+            fringe["cost"].pop(),
+            fringe["level"].pop(),
+            fringe["path"].pop(),
+            fringe["action"].pop()
+        )
+        popped += 1
+
+        if (node == goal).all():
+            print(f"Nodes Popped: {popped}")
+            print(f"Nodes Expanded: {expanded}")
+            print(f"Nodes Generated: {generated}")
+            print(f"Max Fringe Size: {fsize}")
+            print(f"Goal reached at depth {level} at a cost of {cost}.")
+            print("Steps:")
+            print("\n".join(move[1:]))  # Print all steps cleanly
+            writegoalonfile(node, cost, level, pathway[-1], move[-1])
+            break
+
+        if not any((node == x).all() for x in closed):  # Avoid revisiting nodes
+            successors = expand(node, cost, level, method, pathway, move)
+            generated += successors
+            closed.append(node)
+
+            if Flag == "true":
+                writeonfile(node, cost, level, pathway[-1], move[-1], successors)
+
+            expanded += 1
+            fsize = max(fsize, len(fringe["states"]))  # Update max fringe size
