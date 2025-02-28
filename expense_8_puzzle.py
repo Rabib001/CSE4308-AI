@@ -325,3 +325,46 @@ if method == 'ucs':
         # Update max fringe size
         fsize = max(fsize, len(fringe["states"]))
 
+if method == "greedy":
+    while fringe["states"]:
+        # Find the node with the lowest heuristic value
+        lowest_heuristic_index = fringe["heuristic"].index(min(fringe["heuristic"]))
+        
+        # Pop the node with the lowest heuristic value
+        node, cost, level, pathway, move, heuristic = (
+            fringe["states"].pop(lowest_heuristic_index),
+            fringe["cost"].pop(lowest_heuristic_index),
+            fringe["level"].pop(lowest_heuristic_index),
+            fringe["path"].pop(lowest_heuristic_index),
+            fringe["action"].pop(lowest_heuristic_index),
+            fringe["heuristic"].pop(lowest_heuristic_index)
+        )
+        popped += 1
+
+        # Check if the goal is reached
+        if (node == goal).all():
+            print(f"Nodes Popped: {popped}")
+            print(f"Nodes Expanded: {expanded}")
+            print(f"Nodes Generated: {generated}")
+            print(f"Max Fringe Size: {fsize}")
+            print(f"Goal reached at depth {level} at a cost of {cost}.")
+            print("Steps:")
+            for step in move[1:]:
+                print(step)
+            writegoalonfile(node, cost, level, pathway[-1], move[-1])
+            break
+
+        # Skip if the node is already in the closed list
+        if any((node == x).all() for x in closed):
+            continue
+
+        # Generate successors and update fringe
+        successors = expand(node, cost, level, method, pathway, move)
+        generated += successors
+        closed.append(node)
+        if Flag == "true":
+            writeonfile(node, cost, level, pathway[-1], move[-1], successors)
+        expanded += 1
+
+        # Update max fringe size
+        fsize = max(fsize, len(fringe["states"]))
