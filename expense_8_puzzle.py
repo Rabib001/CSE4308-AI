@@ -459,3 +459,64 @@ if method == 'dls':
 
         fsize = max(fsize, len(fringe["states"]))
         print("Updated Fringe Size:", fsize)
+
+if method == 'ids':
+    limit = 0
+
+    while True:
+        # Reset fringe for each depth limit iteration
+        fringe["states"] = [start]
+        fringe["cost"] = [0]
+        fringe["level"] = [0]
+        fringe["path"] = [[None]]
+        fringe["action"] = [[None]]
+
+        goal_found = False  # Track if the goal is found
+
+        while fringe["states"]:
+            node, cost, level, pathway, move = (
+                fringe["states"].pop(),
+                fringe["cost"].pop(),
+                fringe["level"].pop(),
+                fringe["path"].pop(),
+                fringe["action"].pop()
+            )
+            popped += 1
+
+            if (node == goal).all():
+                print(f"Nodes Popped: {popped}")
+                print(f"Nodes Expanded: {expanded}")
+                print(f"Nodes Generated: {generated}")
+                print(f"Max Fringe Size: {fsize}")
+                print(f"Goal reached at depth {level} at a cost of {cost}.")
+                print("Steps:")
+                for step in move[1:]:
+                    print(step)
+                writegoalonfile(node, cost, level, pathway[-1], move[-1])
+                goal_found = True  # Mark goal as found
+                break  # Stop searching in the current iteration
+
+            if level < limit:
+                successors = expand(node, cost, level, method, pathway, move)
+                
+                if isinstance(successors, list):  # Ensure it's a list of successor states
+                    generated += len(successors)
+                    for succ in successors:
+                        fringe["states"].append(succ["state"])
+                        fringe["cost"].append(succ["cost"])
+                        fringe["level"].append(succ["level"])
+                        fringe["path"].append(succ["path"])
+                        fringe["action"].append(succ["action"])
+                else:
+                    generated += successors  # If it returns an integer count
+
+                if Flag == "true":
+                    writeonfile(node, cost, level, pathway[-1], move[-1], successors)
+
+                expanded += 1
+                fsize = max(fsize, len(fringe["states"]))
+
+        if goal_found:
+            break  # Exit the entire IDS loop
+
+        limit += 1  # Increase depth limit for the next iteration
