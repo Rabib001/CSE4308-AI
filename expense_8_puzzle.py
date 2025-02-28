@@ -369,6 +369,52 @@ if method == "greedy":
         # Update max fringe size
         fsize = max(fsize, len(fringe["states"]))
 
+if method == "a*":
+    while fringe["states"]:
+        # Find the node with the lowest f(n) value
+        lowest_fvalue_index = fringe["fnvalue"].index(min(fringe["fnvalue"]))
+        
+        # Pop the node with the lowest f(n) value
+        node, cost, level, pathway, move, heuristic, fnvalue = (
+            fringe["states"].pop(lowest_fvalue_index),
+            fringe["cost"].pop(lowest_fvalue_index),
+            fringe["level"].pop(lowest_fvalue_index),
+            fringe["path"].pop(lowest_fvalue_index),
+            fringe["action"].pop(lowest_fvalue_index),
+            fringe["heuristic"].pop(lowest_fvalue_index),
+            fringe["fnvalue"].pop(lowest_fvalue_index)
+        )
+        popped += 1
+
+        # Check if the goal is reached
+        if (node == goal).all():
+            print(f"Nodes Popped: {popped}")
+            print(f"Nodes Expanded: {expanded}")
+            print(f"Nodes Generated: {generated}")
+            print(f"Max Fringe Size: {fsize}")
+            print(f"Goal reached at depth {level} at a cost of {cost}.")
+            print("Steps:")
+            for step in move[1:]:
+                print(step)
+            writegoalonfile(node, cost, level, pathway[-1], move[-1], fnvalue)
+            break
+
+        # Skip if the node is already in the closed list
+        if any((node == x).all() for x in closed):
+            continue
+
+        # Generate successors and update fringe
+        successors = expand(node, cost, level, method, pathway, move)
+        generated += successors
+        closed.append(node)
+        if Flag == "true":
+            writeonfile(node, cost, level, pathway[-1], move[-1], fnvalue, successors)
+        expanded += 1
+
+        # Update max fringe size
+        fsize = max(fsize, len(fringe["states"]))
+
+
 if method == 'dls':
     limit = int(input("Enter the depth limit: "))  # Get depth limit from user
     max_iterations = 1000  # Prevent infinite loops
