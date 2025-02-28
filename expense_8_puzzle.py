@@ -368,3 +368,48 @@ if method == "greedy":
 
         # Update max fringe size
         fsize = max(fsize, len(fringe["states"]))
+
+if method == 'dls':
+    limit = int(input("Enter the depth limit: "))  # Get depth limit from user
+    max_iterations = 1000  # Prevent infinite loops
+    iteration = 0
+    while fringe["states"] and iteration < max_iterations:
+        iteration += 1
+        print("Processing node:")
+        print(node)
+        node, cost, level, pathway, move = (
+            fringe["states"].pop(),
+            fringe["cost"].pop(),
+            fringe["level"].pop(),
+            fringe["path"].pop(),
+            fringe["action"].pop()
+        )
+        popped += 1
+
+        if (node == goal).all():
+            print("Goal reached!")
+            print(f"Nodes Popped: {popped}")
+            print(f"Nodes Expanded: {expanded}")
+            print(f"Nodes Generated: {generated}")
+            print(f"Max Fringe Size: {fsize}")
+            print(f"Goal reached at depth {level} at a cost of {cost}.")
+            print("Steps:")
+            for step in move[1:]:
+                print(step)
+            writegoalonfile(node, cost, level, pathway[-1], move[-1])
+            break
+
+        if level >= limit:
+            print("Depth limit reached. Skipping node.")
+            continue
+
+        print("Generating successors...")
+        successors = expand(node, cost, level, method, pathway, move)
+        generated += successors
+        if Flag == "true":
+            print("Writing to dump.txt...")
+            writeonfile(node, cost, level, pathway[-1], move[-1], successors)
+        expanded += 1
+
+        fsize = max(fsize, len(fringe["states"]))
+        print("Updated Fringe Size:", fsize)
