@@ -11,7 +11,7 @@ def parse_args():
     return parser.parse_args()
 
 #Check if game reached terminal state
-def terminal_state(state):
+def terminal_test(state):
     return state[0] == 0 or state[1] == 0
 
 #calculate score
@@ -37,10 +37,47 @@ def successors(state):
     return moves
 
 #take current game state and return a new state
-def move(state, mv):
+def move_marble(state, mv):
     pile, count = mv
     if pile == "red":
         return (state[0]-count, state[1])
     else:
         return (state[0], state[1]-count)
     
+def max_val(state, alpha, beta, depth, version):
+    if terminal_test(state) or depth == 0:
+        return score(state, version)
+    v = -math.inf
+    for move in successors(state):
+        new_state = move_marble(state, move)
+        v = max(v, min_val(new_state, alpha, beta, depth - 1, version))
+        if v >= beta:
+            return v
+        alpha = max(alpha, v)
+    return v
+
+def min_val(state, alpha, beta, depth, version):
+    if terminal_test(state) or depth == 0:
+        return score(state, version)
+    v = math.inf
+    for move in successors(state):
+        new_state = move_marble(state, move)
+        v = min(v, max_val(new_state, alpha, beta, depth - 1, version))
+        if v <= alpha:
+            return v
+        beta = min(beta, v)
+    return v
+
+def alpha_beta_decision(state, depth, version):
+    best_move = None
+    best_value = -math.inf
+    alpha = -math.inf
+    beta = math.inf
+    for move in successors(state):
+        new_state = move_marble(state, move)
+        value = min_val(new_state, alpha, beta, depth - 1, version)
+        if value > best_value:
+            best_value = value
+            best_move = move
+        alpha = max(alpha, best_value)
+    return best_move
