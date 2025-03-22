@@ -81,3 +81,24 @@ def alpha_beta_decision(state, depth, version):
             best_move = move
         alpha = max(alpha, best_value)
     return best_move
+
+def computer_move(state, version, depth=None):
+    if depth in None:
+        depth = math.inf
+    return alpha_beta_decision(state, version, depth)
+
+def human_move(state):
+    while True:
+        pile = input("Choose a pile (red/blue): ").strip().lower()
+        if pile not in ["red", "blue"]:
+            print("Invalid pile. Please choose red or blue.")
+            continue
+        count = input(f"Enter number of marbles to remove from {pile} pile (1 or 2): ").strip()
+        if count not in ["1", "2"]:
+            print("Invalid number of marbles. Please choose 1 or 2.")
+            continue
+        count = int(count)
+        if (pile == "red" and state[0] < count) or (pile == "blue" and state[1] < count):
+            print("Not enough marbles in the pile. Please choose a smaller number.")
+            continue
+        return (pile, count)
