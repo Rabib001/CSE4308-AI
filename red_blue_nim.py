@@ -5,8 +5,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Red-Blue Nim Game")
     parser.add_argument("num_red", type=int, help="Number of red marbles")
     parser.add_argument("num_blue", type=int, help="Number of blue marbles")
-    parser.add_argument("version", nargs="?", default="standard", choices=["standard","misere"] help="Game version (default: standard)")    #optional in command line
-    parser.add_argument("first_player", nargs="?", default="computer", choices=["computer","human"] help="First player (default: computer)")    #optional in command line
+    parser.add_argument("version", nargs="?", default="standard", choices=["standard","misere"], help="Game version (default: standard)")    #optional in command line
+    parser.add_argument("first_player", nargs="?", default="computer", choices=["computer","human"], help="First player (default: computer)")    #optional in command line
     parser.add_argument("depth", nargs="?", type=int, help="Depth limit for the search")    #optional in command line(for extra credit)
     return parser.parse_args()
 
@@ -83,9 +83,9 @@ def alpha_beta_decision(state, depth, version):
     return best_move
 
 def computer_move(state, version, depth=None):
-    if depth in None:
+    if depth is None:
         depth = math.inf
-    return alpha_beta_decision(state, version, depth)
+    return alpha_beta_decision(state, depth, version)
 
 def human_move(state):
     while True:
@@ -102,3 +102,31 @@ def human_move(state):
             print("Not enough marbles in the pile. Please choose a smaller number.")
             continue
         return (pile, count)
+    
+def play(num_red, num_blue, version, first_player, depth):
+    state = (num_red, num_blue)
+    current_player = first_player
+
+    while True:
+        print(f"Current state: Red={state[0]}, Blue={state[1]}")
+        if terminal_test(state):
+            score = 2* state[0] + 3* state[1]
+            if version == "standard":
+                winner = "Human" if current_player == "computer" else "Computer"
+            else:
+                winner = "Computer" if current_player == "computer" else "Human"
+            print(f"Game Over! {winner} wins with a score of {score}.")
+            break
+        if current_player == "computer":
+            move = computer_move(state, version, depth)
+            print(f"Computer removes {move[1]} from {move[0]} pile.")
+        else:
+            move = human_move(state)
+            print(f"Human removes {move[1]} from {move[0]} pile.")
+        
+        state = move_marble(state, move)
+        current_player = "human" if current_player == "computer" else "computer"
+
+if __name__ == "__main__":
+    args = parse_args()
+    play(args.num_red, args.num_blue, args.version, args.first_player, args.depth)
